@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windup · 团队看板</title>
+<style>
+  :root { --bg:#0f1117; --panel:#1a1d27; --card:#232733; --line:#2e3340; --txt:#e6e8ee; --dim:#8b93a7;
+          --todo:#4a6cf7; --doing:#f7a34a; --done:#3ecf8e; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font-family:-apple-system,"PingFang SC",sans-serif; }
+  header { padding:18px 24px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; }
+  header h1 { margin:0; font-size:20px; }
+  header .ns { color:var(--dim); font-size:13px; }
+  header .updated { margin-left:auto; color:var(--dim); font-size:12px; }
+  .board { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding:20px 24px; align-items:start; }
+  .col { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; min-height:120px; }
+  .col h2 { margin:4px 6px 12px; font-size:14px; display:flex; align-items:center; gap:8px; }
+  .dot { width:9px; height:9px; border-radius:50%; }
+  .col.todo .dot{background:var(--todo)} .col.doing .dot{background:var(--doing)} .col.done .dot{background:var(--done)}
+  .col .count { margin-left:auto; color:var(--dim); font-weight:400; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:11px 12px; margin-bottom:10px; }
+  .card .top { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .card .id { font-size:11px; color:var(--dim); font-family:monospace; }
+  .card .area { font-size:11px; padding:1px 7px; border-radius:20px; background:#2e3340; color:#b9c0d0; }
+  .card .diff { font-size:11px; color:var(--dim); margin-left:auto; }
+  .card .title { font-size:14px; font-weight:600; margin:2px 0 6px; }
+  .card .desc { font-size:12px; color:var(--dim); line-height:1.55; }
+  .card .who { margin-top:8px; display:flex; gap:6px; flex-wrap:wrap; }
+  .chip { font-size:11px; background:#31384a; color:#cdd4e4; padding:2px 8px; border-radius:20px; }
+  .card .note { margin-top:6px; font-size:11px; color:#9aa3b7; border-left:2px solid var(--line); padding-left:8px; }
+  footer { padding:16px 24px; color:var(--dim); font-size:12px; border-top:1px solid var(--line); }
+  code { background:#232733; padding:1px 5px; border-radius:4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Windup · 团队看板</h1>
+  <span class="ns" id="ns"></span>
+  <span class="updated" id="updated"></span>
+</header>
+<div class="board">
+  <div class="col todo"><h2><span class="dot"></span>待认领<span class="count" id="c-todo">0</span></h2><div id="todo"></div></div>
+  <div class="col doing"><h2><span class="dot"></span>进行中<span class="count" id="c-doing">0</span></h2><div id="doing"></div></div>
+  <div class="col done"><h2><span class="dot"></span>完成<span class="count" id="c-done">0</span></h2><div id="done"></div></div>
+</div>
+<footer>
+  数据来源：<code>board/tasks.json</code> + <code>board/events/*.jsonl</code>。认领/更新方式见 <code>AGENTS.md</code>。分钟级刷新（push 后 Pages 自动重建）。
+</footer>
+<script src="./app.js"></script>
+</body>
+</html>

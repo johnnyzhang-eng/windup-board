@@ -1,0 +1,4 @@
+{"ts":"2026-07-14T02:00:00Z","type":"claim","task":"T-09","by":"johnnyzhang"}
+{"ts":"2026-07-14T02:00:01Z","type":"status","task":"T-09","status":"doing"}
+{"ts":"2026-07-14T02:05:00Z","type":"claim","task":"T-10","by":"johnnyzhang"}
+{"ts":"2026-07-14T02:05:01Z","type":"status","task":"T-10","status":"doing"}

@@ -1,0 +1,69 @@
+{
+  "project": "Windup · 2D 角色素材生成",
+  "northStar": "人物一致性 + 动作方向",
+  "updated": "2026-07-14",
+  "columns": ["todo", "doing", "done"],
+  "note": "每个任务颗粒度 ≤2 小时可出结果；含 交付物 / 完成标准 / 从哪下手。认领见 AGENTS.md。",
+  "tasks": [
+    {
+      "id": "T-01", "title": "把架构空骨架 PR 提进主仓", "area": "架构", "est": "1h",
+      "deliverable": "game-asset-character 上一个关联 Issue #3 的 PR（会合并入库）",
+      "done": "PR 已开、CI/编译过、Refs #3、挂 MS1 milestone",
+      "start": "已 fork+建分支+放好代码，只差 push+gh pr create；命令见 MS1/MS1-GitHub提交命令清单.md"
+    },
+    {
+      "id": "T-02", "title": "打 tag v0.1.0-ms1", "area": "架构", "est": "0.5h",
+      "deliverable": "主仓一个 v0.1.0-ms1 tag + Release 说明",
+      "done": "tag 指向合并后的空骨架 commit，Release 列清本轮交付",
+      "start": "依赖 T-01 合并后；git tag + gh release create"
+    },
+    {
+      "id": "T-03", "title": "方向检测改 CV 镜像法（先出原型）", "area": "管线", "est": "2h",
+      "deliverable": "direction.py 里一个 detect_facing() 用'帧 vs 水平镜像的自相似'判朝向，跑通 run 8 帧测试集",
+      "done": "能正确标出 run-01 是反的（VLM 那版做不到）；给出每帧 left/right",
+      "start": "pipeline/direction.py 现有 facing_vlm 不可靠；用 PIL 做镜像+像素差，参考帧组内多数投票"
+    },
+    {
+      "id": "T-04", "title": "walk 姿势描述再调一版 + 重跑骷髅", "area": "生成", "est": "1.5h",
+      "deliverable": "actions.py walk 描述改进版 + 骷髅新走路 GIF 对比图",
+      "done": "新 GIF 比现版更像走路（腿交替更清晰），主观 3 人认可",
+      "start": "pipeline/actions.py 的 walk poses；run.py --regen 局部重跑，别整套重生成"
+    },
+    {
+      "id": "T-05", "title": "端到端跑通 idle 动作（一个角色）", "area": "生成", "est": "1.5h",
+      "deliverable": "characters/<角色>/idle 的帧+GIF+sheet",
+      "done": "idle 8 帧一致、有轻微呼吸起伏、autofix 无报错",
+      "start": "run.py --actions idle；actions.py 已有 idle 定义，直接跑"
+    },
+    {
+      "id": "T-06", "title": "Cocos 空项目导入 walk sheet（最小验证）", "area": "引擎", "est": "2h",
+      "deliverable": "Cocos 里角色播放 walk 的截图/录屏",
+      "done": "sprite_sheet.png+.plist 导入后能建 AnimationClip 播放，无需手工重切帧",
+      "start": "装 Cocos Creator 3.8.6；素材在 characters/*/04_output/；步骤见 MS1/Cocos-MCP-导入操作清单.md"
+    },
+    {
+      "id": "T-07", "title": "生成缓存（同参数不重复烧钱）", "area": "管线", "est": "1.5h",
+      "deliverable": "generate.py 加磁盘缓存：key=hash(desc+pose+model)",
+      "done": "同参数第二次调用直接读缓存、不发 API；有开关",
+      "start": "pipeline/generate.py 的 gen_frame；缓存到 .cache/ 目录"
+    },
+    {
+      "id": "T-08", "title": "批量评测脚本（成功率记录表）", "area": "质检", "est": "2h",
+      "deliverable": "eval.py：对 N 个用例跑，输出 csv（跑通率/对齐合格率/成本）",
+      "done": "能跑出一张表，对齐 Proposal 的 ≥70% 目标口径",
+      "start": "复用 pipeline/qa.py 的 alignment_report；遍历 characters/"
+    },
+    {
+      "id": "T-09", "title": "看板前端 app.js（本任务）", "area": "前端", "est": "1h",
+      "deliverable": "index.html 能渲染 tasks+events 成三列看板",
+      "done": "打开网页看到任务分列、认领人 chip、进度",
+      "start": "windup-board/app.js"
+    },
+    {
+      "id": "T-10", "title": "写 AGENTS.md 协议 + board 认领 skill", "area": "协作", "est": "1h",
+      "deliverable": "AGENTS.md（AI 怎么读/认领/更新）+ 一个 board skill",
+      "done": "组员 Claude 一句话能认领任务并 push",
+      "start": "windup-board/AGENTS.md；~/.claude/skills/board/"
+    }
+  ]
+}
