@@ -60,24 +60,24 @@
 flowchart TD
   IN([📥 输入<br/>角色参考图 / 描述<br/>正视 · 任意风格]):::done
   IN ==> M1[① 母版生成<br/>gen_character<br/>伪侧面朝右 · 品红底]:::done
-  M1 ==> GATE{③ 母版门禁<br/>VLM 判朝向<br/>是不是朝右侧面?}:::done
-  GATE -.不是,重来.-> M1
+  M1 ==> GATE{③ 母版门禁<br/>VLM 判朝向<br/>是否朝右侧面}:::done
+  GATE -.->|不是·重来| M1
   GATE ==>|是| STYLE{🎨 风格分路线}:::p0
 
   LORA[["🔒 补：角色 LoRA 锁身份<br/>母版当训练集"]]:::p0
-  LORA -.喂给生成.-> STYLE
+  LORA -.->|喂给生成| STYLE
 
   STYLE ==>|像素| PIX[像素线]:::p0
   STYLE ==>|高清手绘| HD[高清线]:::done
-  STYLE -.伪3D/2.5D.-> P3D[[伪3D线<br/>Zero123++/SV3D/Blender渲相机]]:::p1
+  STYLE -.->|伪3D 2.5D| P3D[[伪3D线<br/>Zero123++ · SV3D · Blender渲相机]]:::p1
 
   HD ==> ACT{④ 动作生成}:::done
   PIX ==> ACT
-  ACT ==>|idle| SHEET[idle：sheet 一次出8格<br/>→ 切分 → 共用 scale 对齐]:::done
+  ACT ==>|idle| SHEET[idle：sheet 一次出8格<br/>切分 → 共用 scale 对齐]:::done
   ACT ==>|walk 骨架逐帧| SK[skeleton_gen<br/>算 8 帧关节角]:::done
-  SK ==> SKUP[["🦴 补：换 DWPose<br/>+ Mixamo 动作库<br/>#T-15 #T-16"]]:::p0
+  SK ==> SKUP[["🦴 补：换 DWPose<br/>+ Mixamo 动作库<br/>T-15 · T-16"]]:::p0
   SKUP ==> GF[gen_frame ×8<br/>母版 + 上一帧 + 骨架图]:::done
-  P3D -.只出控制图,保单帧可编辑.-> SKUP
+  P3D -.->|只出控制图·保单帧可编辑| SKUP
   SHEET ==> MATTE
   GF ==> MATTE
 
@@ -85,25 +85,25 @@ flowchart TD
   MATTE ==>|高清| MBR[["🖼 补：BiRefNet / RMBG"]]:::p1
   MATTE ==>|像素| MKEY[键色 + alpha 二值化<br/>禁 AI matting]:::p0
   MBR ==> ALIGN
-  MKEY ==> PXPOST[["🧩 补：unfake 强制网格化<br/>scale→网格吸附→量化<br/>#T-17"]]:::p0
+  MKEY ==> PXPOST[["🧩 补：unfake 强制网格化<br/>scale → 网格吸附 → 量化<br/>T-17"]]:::p0
   PXPOST ==> ALIGN
 
   ALIGN[⑤ 对齐 normalize<br/>脚底基线 · 256×256]:::done
   ALIGN ==> QA[⑥ 几何质检<br/>高度 / 中心 / 脚底 / 覆盖率]:::done
-  QA ==> QAUP[["🔍 补：多信号评判 #T-13 #T-14<br/>DreamSim 漂移 · VLM-Judge 缺道具/朝向<br/>关键点数腿 · CLIP-IQA 脸崩<br/>⛔ 红线：计数不问 VLM"]]:::p0
-  QAUP ==> BAD{有坏帧?}:::p0
+  QA ==> QAUP[["🔍 补：多信号评判 T-13 · T-14<br/>DreamSim 漂移 · VLM-Judge 缺道具朝向<br/>关键点数腿 · CLIP-IQA 脸崩<br/>⛔ 红线：计数不问 VLM"]]:::p0
+  QAUP ==> BAD{有坏帧}:::p0
 
-  BAD -.删除:穿模/飞点.-> FIX1[["🧽 LaMa 擦除 #T-11"]]:::p0
-  BAD -.缺道具:补法杖.-> FIX2[["🪄 Flux Fill 补 #T-12"]]:::p0
-  BAD -.微修:掉色/断线.-> FIX3[["🖌 低 denoise inpaint"]]:::p0
-  BAD -.语义补不出.-> FIX4[["Gemini/Kontext fallback<br/>+外挂 mask-composite + 重对齐"]]:::p1
-  FIX1 -.修完回对齐.-> ALIGN
+  BAD -.->|删除·穿模飞点| FIX1[["🧽 LaMa 擦除 T-11"]]:::p0
+  BAD -.->|缺道具·补法杖| FIX2[["🪄 Flux Fill 补 T-12"]]:::p0
+  BAD -.->|微修·掉色断线| FIX3[["🖌 低 denoise inpaint"]]:::p0
+  BAD -.->|语义补不出| FIX4[["Gemini / Kontext fallback<br/>外挂 mask-composite + 重对齐"]]:::p1
+  FIX1 -.->|修完回对齐| ALIGN
   FIX2 -.-> ALIGN
   FIX3 -.-> ALIGN
   BAD ==>|无| PACK
 
-  PACK[⑦ 打包<br/>sheet + JSON + plist + tres<br/>+ 尺寸档 + 比例缩放映射]:::done
-  PACK ==> TURN[["🧭 补：4向 turnaround #T-18<br/>对称角色镜像省一半 · 8向 P2"]]:::p1
+  PACK[⑦ 打包<br/>sheet + JSON + plist + tres<br/>尺寸档 + 比例缩放映射]:::done
+  PACK ==> TURN[["🧭 补：4向 turnaround T-18<br/>对称角色镜像省一半 · 8向 P2"]]:::p1
   TURN ==> COCOS[🎮 导入 Cocos 引擎<br/>8 FPS 播放]:::done
   PACK ==> COCOS
 
