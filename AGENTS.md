@@ -1,49 +1,42 @@
-# AGENTS.md — 全队 AI 协作协议
+# AGENTS.md — 全队协作协议（任务走 GitHub Issues）
 
-> 这是给**每个组员的 AI（Claude Code 等）**看的协议。目标：一份共享状态，谁都能看见、谁都能认领任务、不撞车。
-> 人看网页：`https://johnnyzhang-eng.github.io/windup-board/`
+> 任务源 = 本 repo 的 **GitHub Issues**（和"GitHub 承载软件工程流程"对齐，可替代 Jira/Linear 的任务管理那部分）。
+> 网页只做展示：看板 + 大 pipeline 流程图 + 研究中心。人看网页，认领去 Issues。
 
-## 数据模型
+## 三样东西给组员
+1. **网页**：https://johnnyzhang-eng.github.io/windup-board/ —— 看任务看板 + 点右上角看大 pipeline 流程图
+2. **研究资料**：https://github.com/johnnyzhang-eng/windup-board/tree/main/research
+3. **任务**：https://github.com/johnnyzhang-eng/windup-board/issues
 
-- `board/tasks.json` — 任务定义（只读为主；加新任务才改）。字段：id / title / area / est / deliverable / done / start。
-- `board/events/<你的名字>.jsonl` — **你只写这一个文件**（追加，不改别人的）。每行一个事件。这样多人并发写零冲突。
-- `board/events/_index.json` — 列出有哪些人的事件文件。新人加入先把自己名字加进 `authors`。
+## 怎么认领任务（人）
+1. 打开 Issues，挑一个没人 assign 的（标签有 area/优先级，正文有交付物/完成标准/从哪下手）。
+2. 把自己设为该 Issue 的 **Assignee** → 网页上它自动移到"进行中"。
+3. 干完 → **关闭 Issue** → 网页移到"完成"。进度可在 Issue 评论里记。
 
-## 事件格式（往你自己的 jsonl 追加一行）
-
-```json
-{"ts":"2026-07-14T03:00:00Z","type":"claim","task":"T-03","by":"你的名字"}
-{"ts":"2026-07-14T03:00:01Z","type":"status","task":"T-03","status":"doing"}
-{"ts":"2026-07-14T05:00:00Z","type":"note","task":"T-03","text":"CV镜像法原型跑通,run-01已能标出"}
-{"ts":"2026-07-14T05:00:01Z","type":"status","task":"T-03","status":"done"}
-{"ts":"...","type":"unclaim","task":"T-03","by":"你的名字"}
-```
-
-- `type`：`claim`（认领）/ `status`（改状态：todo/doing/done）/ `note`（进度备注）/ `unclaim`（放弃）
-- `ts`：UTC ISO 时间（用于排序，后来的覆盖先前的）
-
-## AI 标准动作
-
-**开工前**：读 `board/tasks.json` 看有哪些 `todo` 且没人 claim 的任务，选一个颗粒度合适（≤2h）的。
-
-**认领并开始**：
+## 怎么认领任务（AI / Claude）
+用 `board` skill，或直接：
 ```bash
-git pull
-printf '%s\n%s\n' \
-  '{"ts":"<now>","type":"claim","task":"T-XX","by":"<你>"}' \
-  '{"ts":"<now>","type":"status","task":"T-XX","status":"doing"}' >> board/events/<你>.jsonl
-git add board/events/<你>.jsonl && git commit -m "board: claim T-XX" && git push
+gh issue list --repo johnnyzhang-eng/windup-board --state open        # 看有什么
+gh issue edit <N> --repo johnnyzhang-eng/windup-board --add-assignee @me   # 认领
+# 干完
+gh issue comment <N> --repo johnnyzhang-eng/windup-board --body "做了X，产出：<链接>"
+gh issue close <N> --repo johnnyzhang-eng/windup-board
 ```
 
-**完成时**：追加 `note`（干了啥/产出链接）+ `status:done`，push。
+## 加新任务
+```bash
+gh issue create --repo johnnyzhang-eng/windup-board \
+  --title "T-XX 标题" --label "area:XX" --label "P0" \
+  --body "交付物：... / 完成标准：... / 从哪下手：..."
+```
+任务颗粒度 **≤2 小时可出结果**，写清交付物/完成标准/从哪下手。
 
-## 规则
+## 研究 → 任务 → 记录 的循环
+- `research/` 想清楚（白板方向 → 调研 → 结论）
+- Issues 去做（可落地项拆成 ≤2h 任务、认领）
+- `research/实验记录/` 回填结果（成功/失败都记）
+- `pipeline-map/` 完善大 pipeline
 
-- **只写自己的 events 文件**，永不改别人的（避免冲突）。
-- push 前先 `git pull`（拉别人的最新 events）。
-- 一个任务尽量一人主领；想结对就都 claim。
-- 加新任务：改 `tasks.json`（这个会有冲突，改前先 pull、改完快 push）。
-- 网页分钟级刷新（push 触发 Pages 重建）。
-
-## 一句话
-选任务 → 往自己的 jsonl 追加 claim+doing → 干 → 追加 note+done。全队在网页上实时看见。
+## 权限
+- hub 在 johnnyzhang-eng 下。组员要 assign/关 Issue 需被加为 collaborator；或只读+在 Issue 评论认领由维护者代操作。
+- 网页免登录读公开 Issues（GitHub API 无认证限速 60次/小时，够用）。

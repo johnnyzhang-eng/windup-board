@@ -15,7 +15,7 @@
 ## 怎么用
 
 - **看任务**：打开网页看三列（待认领/进行中/完成），或读 `board/tasks.json`。任务都 ≤2h 颗粒度，带交付物/完成标准/从哪下手。
-- **认领**：往自己的 `board/events/<名字>.jsonl` 追加 claim → push → 网页分钟级刷新。协议见 `AGENTS.md`，或用 Claude 的 `board` skill 一句话认领。
+- **认领**：在对应 GitHub Issue 上把自己设为 Assignee（网页自动移到"进行中"）；完成=关闭 Issue。或用 Claude 的 `board` skill。
 - **想清楚再做**：`research/00-总纲` 是入口，看白板方向的技术结论；可落地项已拆进看板任务。
 - **做完记录**：`research/实验记录/` 按模板记（成功/失败都留证）。
 
@@ -27,8 +27,7 @@ research/(想清楚:白板→调研→结论) → board/(拆≤2h任务→认领
 ## 结构
 ```
 index.html + app.js       看板网页
-board/tasks.json          18 个任务(工程+研究落地)
-board/events/<名字>.jsonl  每人只写自己的
+board/tasks.json          任务原始清单(已转成 GitHub Issues)
 research/                  00总纲 + 01-07 分方向调研 + 实验记录/
 pipeline-map/             大 pipeline 现状与演进
 docs/                     组员文档(竞品/痛点/引擎/会议/产品方案)

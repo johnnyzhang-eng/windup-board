@@ -28,6 +28,9 @@
   .card .desc { font-size:12px; color:var(--dim); line-height:1.55; }
   .card .who { margin-top:8px; display:flex; gap:6px; flex-wrap:wrap; }
   .chip { font-size:11px; background:#31384a; color:#cdd4e4; padding:2px 8px; border-radius:20px; }
+  .lchip { font-size:10px; border:1px solid; padding:1px 7px; border-radius:20px; background:transparent; }
+  .card .top { flex-wrap:wrap; }
+  .card .id { text-decoration:none; }
   .card .note { margin-top:6px; font-size:11px; color:#9aa3b7; border-left:2px solid var(--line); padding-left:8px; }
   footer { padding:16px 24px; color:var(--dim); font-size:12px; border-top:1px solid var(--line); }
   code { background:#232733; padding:1px 5px; border-radius:4px; }
@@ -45,7 +48,7 @@
   <div class="col done"><h2><span class="dot"></span>完成<span class="count" id="c-done">0</span></h2><div id="done"></div></div>
 </div>
 <footer>
-  数据来源：<code>board/tasks.json</code> + <code>board/events/*.jsonl</code>。认领/更新方式见 <code>AGENTS.md</code>。分钟级刷新（push 后 Pages 自动重建）。
+  数据源：<a href="https://github.com/johnnyzhang-eng/windup-board/issues" target="_blank" style="color:#4a6cf7">GitHub Issues</a>。<b>认领</b>=在对应 Issue 上把自己设为 Assignee（open+已认领→进行中）；<b>完成</b>=关闭 Issue。研究资料见 <a href="https://github.com/johnnyzhang-eng/windup-board/tree/main/research" target="_blank" style="color:#4a6cf7">research/</a>。90 秒自动刷新。
 </footer>
 <script src="./app.js"></script>
 </body>

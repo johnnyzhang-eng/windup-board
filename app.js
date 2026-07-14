@@ -1,71 +1,58 @@
-// Windup 团队看板：读 tasks.json + 所有 events/*.jsonl，叠加算出当前状态，渲染三列。
-// 纯静态、无构建。events 每人一个文件（追加式），避免多人写冲突。
+// Windup 看板：直接读本 repo 的 GitHub Issues（任务源=Issues，和老师说的"GitHub承载流程"对齐）。
+// 三列：待认领(open 未 assign) / 进行中(open 已 assign) / 完成(closed)。免登录读公开 issues。
 
-const EVENT_AUTHORS = window.__BOARD_AUTHORS__ || [];  // 由 events/_index.json 提供，见下
+const REPO = "johnnyzhang-eng/windup-board";
+const API = `https://api.github.com/repos/${REPO}/issues?state=all&per_page=100`;
 
-async function loadJSON(url) {
-  const r = await fetch(url + "?t=" + Date.now());
-  if (!r.ok) throw new Error(url + " " + r.status);
-  return r.json();
-}
-async function loadEvents() {
-  // 读 events/_index.json 拿到有哪些人的事件文件，再逐个读 jsonl
-  let authors = [];
-  try { authors = (await loadJSON("board/events/_index.json")).authors || []; } catch {}
-  const all = [];
-  for (const a of authors) {
-    try {
-      const txt = await (await fetch(`board/events/${a}.jsonl?t=${Date.now()}`)).text();
-      for (const line of txt.split("\n")) {
-        const s = line.trim(); if (!s) continue;
-        try { all.push(JSON.parse(s)); } catch {}
-      }
-    } catch {}
-  }
-  // 按时间排序，后来的覆盖先前的（fold）
-  all.sort((x, y) => (x.ts || "").localeCompare(y.ts || ""));
-  return all;
+async function load() {
+  const r = await fetch(API, { headers: { "Accept": "application/vnd.github+json" } });
+  if (!r.ok) throw new Error("GitHub API " + r.status + (r.status === 403 ? "（速率限制，稍后再刷）" : ""));
+  const issues = (await r.json()).filter(i => !i.pull_request); // 排除 PR
+  return issues;
 }
 
-function fold(tasks, events) {
-  const state = {};
-  for (const t of tasks) state[t.id] = { ...t, status: "todo", assignees: [], note: "" };
-  for (const e of events) {
-    const s = state[e.task]; if (!s) continue;
-    if (e.type === "claim" && e.by && !s.assignees.includes(e.by)) s.assignees.push(e.by);
-    if (e.type === "status" && e.status) s.status = e.status;
-    if (e.type === "note" && e.text) s.note = e.text;
-    if (e.type === "unclaim" && e.by) s.assignees = s.assignees.filter(x => x !== e.by);
-  }
-  return Object.values(state);
+function labelChips(labels) {
+  return labels.map(l => {
+    const c = "#" + (l.color || "888");
+    return `<span class="lchip" style="border-color:${c};color:${c}">${l.name}</span>`;
+  }).join("");
 }
 
-function card(t) {
-  const who = t.assignees.length
-    ? t.assignees.map(a => `<span class="chip">${a}</span>`).join("")
-    : `<span class="chip" style="opacity:.5">未认领</span>`;
-  const note = t.note ? `<div class="note">${t.note}</div>` : "";
-  const meta = [t.est ? "⏱ " + t.est : "", t.deliverable ? "📦 " + t.deliverable : ""].filter(Boolean).join("<br>");
+function card(issue) {
+  const assignees = (issue.assignees || []).map(a => `<span class="chip">@${a.login}</span>`).join("")
+    || `<span class="chip" style="opacity:.45">未认领</span>`;
+  // body 里提取交付物/完成标准做简述
+  const body = (issue.body || "").replace(/\*\*/g, "").slice(0, 260);
   return `<div class="card">
-    <div class="top"><span class="id">${t.id}</span><span class="area">${t.area || ""}</span><span class="diff">${t.est || ""}</span></div>
-    <div class="title">${t.title}</div>
-    <div class="desc">${t.deliverable ? "<b>交付：</b>" + t.deliverable + "<br>" : ""}${t.done ? "<b>完成标准：</b>" + t.done + "<br>" : ""}${t.start ? "<b>下手：</b>" + t.start : (t.desc || "")}</div>
-    <div class="who">${who}</div>${note}
+    <div class="top">
+      <a class="id" href="${issue.html_url}" target="_blank">#${issue.number}</a>
+      ${labelChips(issue.labels)}
+    </div>
+    <div class="title"><a href="${issue.html_url}" target="_blank" style="color:inherit;text-decoration:none">${issue.title}</a></div>
+    <div class="desc">${body}</div>
+    <div class="who">${assignees}</div>
   </div>`;
 }
 
 async function render() {
-  const board = await loadJSON("board/tasks.json");
-  const events = await loadEvents();
-  document.getElementById("ns").textContent = "北极星：" + (board.northStar || "");
-  document.getElementById("updated").textContent = "更新 " + (board.updated || "");
-  const folded = fold(board.tasks, events);
+  document.getElementById("ns").textContent = "北极星：人物一致性 + 动作方向";
+  let issues;
+  try { issues = await load(); }
+  catch (e) { document.getElementById("todo").innerHTML = `<div class="desc">加载失败：${e.message}</div>`; return; }
+
   const cols = { todo: [], doing: [], done: [] };
-  for (const t of folded) (cols[t.status] || cols.todo).push(t);
+  for (const i of issues) {
+    if (i.state === "closed") cols.done.push(i);
+    else if ((i.assignees || []).length) cols.doing.push(i);
+    else cols.todo.push(i);
+  }
+  // 按 issue number 排序，稳定
   for (const k of ["todo", "doing", "done"]) {
+    cols[k].sort((a, b) => a.number - b.number);
     document.getElementById(k).innerHTML = cols[k].map(card).join("") || `<div class="desc" style="padding:8px;opacity:.4">空</div>`;
     document.getElementById("c-" + k).textContent = cols[k].length;
   }
+  document.getElementById("updated").textContent = "共 " + issues.length + " 个任务 · 数据源 GitHub Issues";
 }
-render().catch(e => { document.getElementById("todo").innerHTML = "<div class='desc'>加载失败：" + e.message + "</div>"; });
-setInterval(() => render().catch(() => {}), 60000);  // 每分钟自动刷新
+render();
+setInterval(() => render().catch(() => {}), 90000); // 90s 刷新（避开 API 速率限制）
