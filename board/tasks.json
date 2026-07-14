@@ -64,6 +64,54 @@
       "deliverable": "AGENTS.md（AI 怎么读/认领/更新）+ 一个 board skill",
       "done": "组员 Claude 一句话能认领任务并 push",
       "start": "windup-board/AGENTS.md；~/.claude/skills/board/"
+    },
+    {
+      "id": "T-11", "title": "坏帧 mask-composite 局部修（LaMa 擦除原型）", "area": "管线", "est": "2h",
+      "deliverable": "一个 remove_artifact(frame, mask) 用 IOPaint/LaMa 擦掉穿模肢体/飞点，mask外像素不动",
+      "done": "拿一张有穿模/多腿的坏帧，擦除后其余像素逐像素不变、几何质检通过",
+      "start": "research/02-坏帧不生图修正.md；pip simple-lama-inpainting，CPU可跑"
+    },
+    {
+      "id": "T-12", "title": "补道具 inpaint（Flux Fill 补丢失法杖）", "area": "管线", "est": "2h",
+      "deliverable": "一个 fill_missing(frame, mask, prompt) 用 Flux Fill 补缺失道具",
+      "done": "法杖丢失的帧能补回、风格一致、mask外不动",
+      "start": "research/02；ComfyUI-Flux-Inpainting NF4版低显存"
+    },
+    {
+      "id": "T-13", "title": "DreamSim 跨帧漂移检测", "area": "质检", "est": "1.5h",
+      "deliverable": "drift_report(frames, master)：逐帧对母版+相邻帧算 DreamSim 距离，标漂移帧",
+      "done": "对现有 Lirael/骷髅序列跑出距离曲线，能标出明显漂移帧",
+      "start": "research/06；pip install dreamsim，几十行代码"
+    },
+    {
+      "id": "T-14", "title": "VLM-as-Judge 语义质检（缺道具/朝向）", "area": "质检", "est": "2h",
+      "deliverable": "judge(frame, master, rubric) VLM CoT 打分+指出违规帧/区域",
+      "done": "能抓出'法杖跨帧丢失''朝向反了'，不做计数",
+      "start": "research/06；复用现有 VLM 门禁扩成 rubric+CoT"
+    },
+    {
+      "id": "T-15", "title": "walk 预处理器换 DWPose", "area": "生成", "est": "1h",
+      "deliverable": "skeleton 分支用 DWPose 出骨架（手/脚精度更高）",
+      "done": "walk 脚部落地相位比 OpenPose 版更稳",
+      "start": "research/04；IDEA-Research/DWPose，换预处理器即可"
+    },
+    {
+      "id": "T-16", "title": "Mixamo→OpenPose 动作库接入", "area": "生成", "est": "2h",
+      "deliverable": "从 Mixamo .dae 生成 walk/run/attack 骨架序列（3D真值，不检测sprite）",
+      "done": "跑出一套 walk 骨架、能喂给 gen_frame",
+      "start": "research/04；Astropulse/mixamotoopenpose，pip三个包"
+    },
+    {
+      "id": "T-17", "title": "像素线强制网格化后处理（unfake.js）", "area": "管线", "est": "2h",
+      "deliverable": "像素角色生成后接 unfake：scale检测→网格吸附→调色板量化",
+      "done": "Lirael 那种像素角色出图后网格干净、无伪像素",
+      "start": "research/03；github jenissimo/unfake.js，有CLI/Python移植"
+    },
+    {
+      "id": "T-18", "title": "4向 turnaround 原型（先做4向）", "area": "生成", "est": "2h",
+      "deliverable": "从一个母版出 N/E/S/W 四向图（grid 或逐向+朝向门禁）",
+      "done": "四向是同一角色、朝向对，对称角色验证镜像省一半",
+      "start": "research/05；先 grid 单次出四向，叠参考图锁一致"
     }
   ]
 }

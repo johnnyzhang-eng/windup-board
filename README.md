@@ -1,26 +1,40 @@
-# Windup 团队看板
+# Windup Hub — 团队看板 + 研究中心
 
-全队共享的任务看板：**谁都能看见、谁都能认领、全队 AI 都能读写**。
+全队共享中枢：**任务看板**（谁在做什么，实时）+ **研究/实验中心**（白板所有方向的调研、大 pipeline 演进）+ **组员文档**。
 
 🔗 看板网页：https://johnnyzhang-eng.github.io/windup-board/
 
+## 三大板块
+
+| 板块 | 是什么 | 位置 |
+|---|---|---|
+| **看板** | 任务认领 + 进度，全队实时可见 | 网页 + `board/` |
+| **研究** | 白板方向的技术调研（52条，含"用/P1/P2"结论）+ 大 pipeline 地图 + 实验记录 | `research/` `pipeline-map/` |
+| **文档** | 组员上传的竞品/痛点/调研等（按类分） | `docs/` |
+
 ## 怎么用
 
-- **人**：打开网页，看三列（待认领 / 进行中 / 完成），每张卡有任务、交付物、完成标准、认领人。
-- **AI / 组员**：读 `board/tasks.json` 选任务 → 往自己的 `board/events/<名字>.jsonl` 追加 `claim` + `status:doing` → push → 网页分钟级刷新。协议见 [`AGENTS.md`](AGENTS.md)，或用 Claude 的 `board` skill 一句话认领。
+- **看任务**：打开网页看三列（待认领/进行中/完成），或读 `board/tasks.json`。任务都 ≤2h 颗粒度，带交付物/完成标准/从哪下手。
+- **认领**：往自己的 `board/events/<名字>.jsonl` 追加 claim → push → 网页分钟级刷新。协议见 `AGENTS.md`，或用 Claude 的 `board` skill 一句话认领。
+- **想清楚再做**：`research/00-总纲` 是入口，看白板方向的技术结论；可落地项已拆进看板任务。
+- **做完记录**：`research/实验记录/` 按模板记（成功/失败都留证）。
 
-## 为什么这么设计
-
-- **纯静态**：GitHub Pages 渲染，零后端、零成本；push 触发重建 → 分钟级实时。
-- **每人一个 events 文件**：多人并发写不冲突（只追加自己的）。
-- **AI 友好**：数据是 repo 里的 json，任何 AI 都能免登录读、git push 写，不用另造 API。
+## 工作循环
+```
+research/(想清楚:白板→调研→结论) → board/(拆≤2h任务→认领→做) → research/实验记录/(回填结果) → pipeline-map(完善大pipeline)
+```
 
 ## 结构
-
 ```
-board/tasks.json         任务定义（≤2h 颗粒度：est/deliverable/done/start）
-board/events/<名字>.jsonl 每人只写自己的：claim/status/note/unclaim
-board/events/_index.json  有哪些人的事件文件
-index.html + app.js       Pages 看板（读 tasks+events 叠加渲染）
+index.html + app.js       看板网页
+board/tasks.json          18 个任务(工程+研究落地)
+board/events/<名字>.jsonl  每人只写自己的
+research/                  00总纲 + 01-07 分方向调研 + 实验记录/
+pipeline-map/             大 pipeline 现状与演进
+docs/                     组员文档(竞品/痛点/引擎/会议/产品方案)
 AGENTS.md                 全队 AI 协作协议
 ```
+
+## 关系说明
+- 本 hub = 项目中枢（放个人名下，全队看）。
+- 正式代码交付 → 主仓 `1024XEngineer/game-asset-character`（Fork+PR）。两者分工。
